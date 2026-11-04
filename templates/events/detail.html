@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} — Aroundabout{% endblock %}
+{% block content %}
+<section class="detail-wrap">
+  <a class="back-link" href="{% url 'home' %}#discover">← Back to events</a>
+  {% if event.status == "draft" %}<p class="status-pill status-draft">DRAFT — only you can see this event</p>{% endif %}
+  <div class="detail-layout">
+    <article class="detail-main">
+      <div class="detail-cover">
+        {% if event.image %}<img src="{{ event.image.url }}" alt="">{% else %}<div class="event-image-placeholder detail-placeholder"><span class="placeholder-spark">✳</span><span class="placeholder-word">{{ event.get_category_display|upper }}</span></div>{% endif %}
+        <span class="category-pill">{{ event.get_category_display }}</span>
+      </div>
+      <div class="detail-copy">
+        <div class="eyebrow">{{ event.starts_at|date:"l, F j" }} <span>·</span> {{ event.starts_at|date:"g:i A" }}</div>
+        <h1>{{ event.title }}</h1>
+        <div class="detail-organizer">Hosted by <strong>{{ event.organizer.get_full_name|default:event.organizer.username }}</strong> · {{ event.city }}</div>
+        <div class="detail-description">{{ event.description|linebreaks }}</div>
+        <div class="detail-info">
+          <div class="info-item"><span class="info-icon">⌖</span><div><strong>{{ event.venue }}</strong><span>{{ event.address|default:event.city }}</span></div></div>
+          <div class="info-item"><span class="info-icon">◷</span><div><strong>{{ event.starts_at|date:"D, M j · g:i A" }}</strong><span>Until {{ event.ends_at|date:"g:i A" }}</span></div></div>
+          <div class="info-item"><span class="info-icon">✳</span><div><strong>{% if event.price == 0 %}Free{% else %}${{ event.price }}{% endif %}</strong><span>{% if event.capacity %}{{ going_count }} of {{ event.capacity }} spots claimed{% else %}Everyone is welcome{% endif %}</span></div></div>
+        </div>
+        {% if user.is_authenticated and user.id == event.organizer_id or user.is_staff %}<a class="text-link edit-link" href="{% url 'event_edit' event.slug %}">Edit this event ↗</a>{% endif %}
+      </div>
+    </article>
+    {% if event.status == "published" %}<aside class="detail-aside">
+      <div class="rsvp-card">
+        <p class="eyebrow">SAVE YOUR SPOT</p>
+        <div class="rsvp-count"><strong id="going-count">{{ going_count }}</strong><span>neighbor{{ going_count|pluralize }} going</span></div>
+        {% if already_going %}
+          <form class="rsvp-action" method="post" action="{% url 'api_rsvp' event.slug %}" data-rsvp-form data-cancel-url="{% url 'api_rsvp' event.slug %}">
+            {% csrf_token %}<button class="button button-dark button-wide" type="submit">You’re going <span aria-hidden="true">✓</span></button>
+            <button type="button" class="cancel-rsvp" data-cancel-rsvp>Cancel RSVP</button>
+          </form>
+        {% elif user.is_authenticated %}
+          <form class="rsvp-action" method="post" action="{% url 'api_rsvp' event.slug %}" data-rsvp-form>
+            {% csrf_token %}<button class="button button-dark button-wide" type="submit" {% if event.is_full %}disabled{% endif %}>{% if event.is_full %}All spots filled{% else %}I’m in <span aria-hidden="true">↗</span>{% endif %}</button>
+          </form>
+        {% else %}
+          <a class="button button-dark button-wide" href="{% url 'login' %}?next={{ request.path }}">Log in to RSVP <span aria-hidden="true">↗</span></a>
+        {% endif %}
+        <p class="rsvp-note">{% if event.price == 0 %}Free to attend{% else %}${{ event.price }} per person{% endif %}{% if event.capacity %} · {{ spots_left }} spots left{% endif %}</p>
+      </div>
+      <div class="host-note"><span class="host-note-mark">✳</span><p>Small gatherings make a big difference. Bring a friend, or come meet someone new.</p></div>
+    </aside>{% endif %}
+  </div>
+
+  {% if event.status == "published" %}<section class="reviews-section">
+    <div class="section-heading"><div><p class="eyebrow">NOTES FROM NEIGHBORS</p><h2>Good times, remembered.</h2></div><div class="review-average">{% if average_rating %}<strong>{{ average_rating|floatformat:1 }}</strong> <span>★</span><small>community rating</small>{% else %}<span>Be the first to leave a note</span>{% endif %}</div></div>
+    {% if user.is_authenticated and not has_reviewed and can_review %}
+      <form class="review-form" method="post" action="{% url 'api_reviews' event.slug %}" data-review-form>
+        {% csrf_token %}
+        <label>How was it?
+          <select name="rating" required><option value="">Choose a rating</option><option value="5">★★★★★ — Loved it</option><option value="4">★★★★ — Really good</option><option value="3">★★★ — Good</option><option value="2">★★ — Could be better</option><option value="1">★ — Not for me</option></select>
+        </label>
+        <label>Your note<textarea name="body" maxlength="1200" rows="3" placeholder="Share a helpful note with the neighborhood…" required></textarea></label>
+        <button class="button button-outline" type="submit">Post your note <span aria-hidden="true">↗</span></button>
+      </form>
+    {% elif user.is_authenticated and not can_review %}
+      <p class="muted-copy">Come back after the event to leave a note for the community.</p>
+    {% elif not user.is_authenticated %}
+      <p class="muted-copy"><a class="text-link" href="{% url 'login' %}?next={{ request.path }}">Log in</a> to leave a note for the community.</p>
+    {% endif %}
+    <div class="review-list" id="review-list">
+      {% for review in reviews %}
+        <article class="review-card"><div class="review-card-top"><strong>{{ review.author.get_full_name|default:review.author.username }}</strong><span class="review-stars" aria-label="{{ review.rating }} out of 5 stars">{% for _ in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span></div><p>{{ review.body|linebreaksbr }}</p><time datetime="{{ review.created_at|date:'c' }}">{{ review.created_at|date:"M j, Y" }}</time></article>
+      {% empty %}<p class="muted-copy" id="no-reviews">No notes yet. After the event, come back and tell everyone how it went.</p>
+      {% endfor %}
+    </div>
+    <p class="search-status" id="interaction-status" role="status"></p>
+  </section>{% endif %}
+</section>
+{% endblock %}

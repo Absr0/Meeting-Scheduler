@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Join the neighborhood — Aroundabout{% endblock %}
+{% block content %}
+<section class="auth-page"><div class="auth-art signup-art"><span>✿</span><p>Your people are<br>just around the corner.</p></div><div class="auth-panel"><p class="eyebrow">PULL UP A CHAIR</p><h1>Let’s meet.</h1><p>Make an account to find your people and host your own little gathering.</p>
+  <form method="post" class="auth-form">{% csrf_token %}
+    {% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    <button class="button button-dark button-wide" type="submit">Create account <span aria-hidden="true">↗</span></button>
+  </form><p class="auth-switch">Already one of us? <a class="text-link" href="{% url 'login' %}">Log in</a></p>
+</div></section>
+{% endblock %}

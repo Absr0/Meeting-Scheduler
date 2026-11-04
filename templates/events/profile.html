@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Your profile — Aroundabout{% endblock %}
+{% block content %}
+<section class="form-page">
+  <div class="form-intro"><p class="eyebrow">A LITTLE ABOUT YOU</p><h1>Your neighborhood<br>profile.</h1><p>Help people know who’s hosting and what your community is like.</p></div>
+  <form class="form-card" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}<div class="form-field profile-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    <div class="form-actions"><button class="button button-dark" type="submit">Save profile <span aria-hidden="true">↗</span></button></div>
+  </form>
+</section>
+{% endblock %}

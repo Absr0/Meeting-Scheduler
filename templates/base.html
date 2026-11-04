@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>{% block title %}Aroundabout — find your people{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Main navigation">
+      <a class="brand" href="{% url 'home' %}"><span class="brand-mark">a</span> aroundabout<span class="brand-dot">.</span></a>
+      <div class="nav-links">
+        <a href="{% url 'home' %}">Explore</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'event_create' %}">Host an event</a>
+          {% if user.is_staff or user.profile.is_organizer %}<a href="{% url 'organizer_dashboard' %}">Organizer</a>{% endif %}
+          <a href="{% url 'profile' %}">Profile</a>
+          {% if user.is_staff %}<a href="{% url 'admin:index' %}">Admin</a>{% endif %}
+          <form class="nav-logout" method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+        {% else %}
+          <a href="{% url 'login' %}">Log in</a>
+          <a class="nav-signup" href="{% url 'signup' %}">Join the neighborhood <span aria-hidden="true">↗</span></a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  <main>
+    {% if messages %}
+      <div class="flash-stack" aria-live="polite">
+        {% for message in messages %}<div class="flash flash-{{ message.tags }}">{{ message }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark">a</span> aroundabout<span class="brand-dot">.</span></a>
+    <span>Good things happen close to home.</span>
+  </footer>
+  <script src="{% static 'app.js' %}" defer></script>
+</body>
+</html>

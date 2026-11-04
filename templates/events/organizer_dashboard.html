@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Organizer space — Aroundabout{% endblock %}
+{% block content %}
+<section class="dashboard-wrap">
+  <div class="dashboard-heading"><div><p class="eyebrow">YOUR COMMUNITY, IN MOTION</p><h1>Organizer space.</h1><p>Keep an eye on the good things you’re bringing together.</p></div><a class="button button-dark" href="{% url 'event_create' %}">Create an event <span aria-hidden="true">↗</span></a></div>
+  <div class="dashboard-stats"><div><span>Events hosted</span><strong>{{ events|length }}</strong></div><div><span>Neighbor RSVPs</span><strong>{{ rsvp_total }}</strong></div><div><span>Events published</span><strong>{{ published_count }}</strong></div></div>
+  <div class="dashboard-list">
+    <div class="list-heading"><h2>Your events</h2><span>MANAGE AND KEEP THINGS UP TO DATE</span></div>
+    {% for event in events %}<article class="manage-event"><div class="manage-date">{{ event.starts_at|date:"M" }}<strong>{{ event.starts_at|date:"j" }}</strong></div><div class="manage-event-main"><h3><a href="{% url 'event_detail' event.slug %}">{{ event.title }}</a></h3><p>{{ event.venue }} · {{ event.city }} · {{ event.rsvp_count }} going</p></div><span class="status-pill status-{{ event.status }}">{{ event.get_status_display }}</span><a class="round-arrow" href="{% url 'event_edit' event.slug %}" aria-label="Edit {{ event.title }}">↗</a></article>
+    {% empty %}<div class="empty-state dashboard-empty"><span class="empty-icon">✳</span><h3>Your first gathering starts here.</h3><p>Create an event and invite the neighborhood.</p><a class="button button-dark" href="{% url 'event_create' %}">Create an event <span aria-hidden="true">↗</span></a></div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

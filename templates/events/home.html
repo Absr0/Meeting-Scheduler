@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Aroundabout — local plans, good people{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> YOUR NEIGHBORHOOD, A LITTLE CLOSER</div>
+    <h1>Make a plan.<br><span>Find your people.</span></h1>
+    <p class="hero-copy">The little things happening around the corner are often the best things. Find your next favorite local gathering.</p>
+    <a class="button button-dark" href="#discover">Find something to do <span aria-hidden="true">↓</span></a>
+    <div class="hero-note"><span class="note-avatars">✳︎ ◉ ✿</span><span>Made for neighbors, by neighbors</span></div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="sun-disc"></div>
+    <div class="art-caption"><span>GOOD PLANS<br>LIVE HERE</span><span class="caption-arrow">↗</span></div>
+    <div class="art-stamp">LOCAL<br>IS A<br>FEELING</div>
+    <div class="art-leaf leaf-one"></div><div class="art-leaf leaf-two"></div><div class="art-leaf leaf-three"></div>
+  </div>
+</section>
+
+<section class="discover section-wrap" id="discover">
+  <div class="section-heading">
+    <div><p class="eyebrow">THE NEIGHBORHOOD CALENDAR</p><h2>Out there, close by.</h2></div>
+    <p class="section-aside">A good excuse to step outside<br>and say hello.</p>
+  </div>
+  <form class="search-panel" id="event-search" action="{% url 'home' %}" method="get" data-events-api="{% url 'api_events' %}">
+    <label class="search-input"><span aria-hidden="true">⌕</span><input id="search-query" type="search" name="q" value="{{ request.GET.q }}" placeholder="Try “live music” or “book club”" aria-label="Search events"></label>
+    <label class="select-wrap"><span class="sr-only">Category</span><select id="search-category" name="category"><option value="">All kinds</option>{% for value, label in categories %}<option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <label class="city-input"><span aria-hidden="true">⌖</span><input id="search-city" type="search" name="city" value="{{ request.GET.city }}" placeholder="Your area" aria-label="Filter by city"></label>
+    <button class="button button-dark search-button" type="submit">Find events <span aria-hidden="true">↗</span></button>
+  </form>
+  <div class="result-meta"><span id="results-count">{{ events|length }} upcoming {% if events|length == 1 %}gathering{% else %}gatherings{% endif %}</span><span>CURATED BY YOUR COMMUNITY</span></div>
+  <div class="event-grid" id="event-grid" aria-live="polite">
+    {% for event in events %}
+      <article class="event-card">
+        <a class="event-image-link" href="{% url 'event_detail' event.slug %}">
+          {% if event.image %}<img class="event-image" src="{{ event.image.url }}" alt="">{% else %}<div class="event-image event-image-placeholder tone-{{ forloop.counter0|divisibleby:'4'|yesno:'four,one' }}"><span class="placeholder-spark">✳</span><span class="placeholder-word">{{ event.get_category_display|upper }}</span></div>{% endif %}
+          <span class="category-pill">{{ event.get_category_display }}</span>
+        </a>
+        <div class="event-card-content">
+          <div class="event-date">{{ event.starts_at|date:"D, M j" }} <span>·</span> {{ event.starts_at|date:"g:i A" }}</div>
+          <h3><a href="{% url 'event_detail' event.slug %}">{{ event.title }}</a></h3>
+          <p class="card-location"><span aria-hidden="true">⌖</span> {{ event.venue }} · {{ event.city }}</p>
+          <div class="card-bottom"><span>{% if event.going_count %}{{ event.going_count }} going{% else %}Be the first to go{% endif %}</span><a class="round-arrow" href="{% url 'event_detail' event.slug %}" aria-label="View {{ event.title }}">↗</a></div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state" id="empty-events"><span class="empty-icon">✳</span><h3>No plans on the calendar just yet.</h3><p>Be the first to bring people together in your neighborhood.</p><a class="button button-outline" href="{% if user.is_authenticated %}{% url 'event_create' %}{% else %}{% url 'signup' %}{% endif %}">Post the first event <span aria-hidden="true">↗</span></a></div>
+    {% endfor %}
+  </div>
+  <p class="search-status" id="search-status" role="status"></p>
+</section>
+
+<section class="host-banner section-wrap">
+  <div><p class="eyebrow">GOT A GOOD THING GOING?</p><h2>Your idea could be<br>someone’s new tradition.</h2></div>
+  <a class="button button-light" href="{% if user.is_authenticated %}{% url 'event_create' %}{% else %}{% url 'signup' %}{% endif %}">Bring people together <span aria-hidden="true">↗</span></a>
+  <span class="banner-star" aria-hidden="true">✳</span>
+</section>
+{% endblock %}

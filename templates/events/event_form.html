@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit event{% else %}Host an event{% endif %} — Aroundabout{% endblock %}
+{% block content %}
+<section class="form-page">
+  <a class="back-link" href="{% if object %}{% url 'event_detail' object.slug %}{% else %}{% url 'home' %}{% endif %}">← Go back</a>
+  <div class="form-intro"><p class="eyebrow">BRING PEOPLE TOGETHER</p><h1>{% if object %}Update the details.{% else %}Make a little<br>neighborhood magic.{% endif %}</h1><p>Share the details and let your neighbors know what you’re planning.</p></div>
+  <form class="form-card" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}
+        <div class="form-field {% if field.name == 'description' or field.name == 'image' %}form-field-full{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required-mark">*</span>{% endif %}</label>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="form-actions"><a class="button button-quiet" href="{% if object %}{% url 'event_detail' object.slug %}{% else %}{% url 'home' %}{% endif %}">Cancel</a><button class="button button-dark" type="submit">{% if object %}Save changes{% else %}Post your event{% endif %} <span aria-hidden="true">↗</span></button></div>
+  </form>
+</section>
+{% endblock %}
