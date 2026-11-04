@@ -5,9 +5,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "local-development-key-change-before-deploy")
-DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "False"
+##ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = [
+    'meeting-scheduler-dtl5.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
