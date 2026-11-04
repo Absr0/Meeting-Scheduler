@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Django collected static files
+staticfiles/
+
+# Environment variables
+.env
+.env.*
+

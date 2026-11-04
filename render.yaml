@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: meeting-scheduler-dtl5
+    env: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn eventhub.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
